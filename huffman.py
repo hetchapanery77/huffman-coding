@@ -1,10 +1,6 @@
 import heapq
 import os
-
-"""
-author: Bhrigu Srivastava
-website: https:bhrigu.me
-"""
+import pickle
 
 class HuffmanCoding:
 	def __init__(self, path):
@@ -123,6 +119,9 @@ class HuffmanCoding:
 			padded_encoded_text = self.pad_encoded_text(encoded_text)
 
 			b = self.get_byte_array(padded_encoded_text)
+			
+			# Save reverse_mapping for decompression
+			pickle.dump(self.reverse_mapping, output)
 			output.write(bytes(b))
 
 		print("Compressed")
@@ -159,9 +158,11 @@ class HuffmanCoding:
 		filename, file_extension = os.path.splitext(self.path)
 		output_path = filename + "_decompressed" + ".txt"
 
-		with open(input_path, 'rb') as file, open(output_path, 'w') as output:
+		with open(input_path, 'rb') as file:
+			# Load reverse_mapping
+			self.reverse_mapping = pickle.load(file)
+			
 			bit_string = ""
-
 			byte = file.read(1)
 			while(len(byte) > 0):
 				byte = ord(byte)
@@ -170,11 +171,10 @@ class HuffmanCoding:
 				byte = file.read(1)
 
 			encoded_text = self.remove_padding(bit_string)
-
 			decompressed_text = self.decode_text(encoded_text)
 			
-			output.write(decompressed_text)
+			with open(output_path, 'w') as output:
+				output.write(decompressed_text)
 
 		print("Decompressed")
 		return output_path
-
